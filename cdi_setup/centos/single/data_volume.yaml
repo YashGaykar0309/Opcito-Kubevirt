@@ -1,0 +1,15 @@
+---
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  name: centos-dv
+spec:
+  source:
+    http:
+      url: https://centos.excellmedia.net/8-stream/isos/x86_64/CentOS-Stream-8-20240129.0-x86_64-boot.iso
+  pvc:
+    accessModes:
+      - ReadWriteMany
+    resources:
+      requests:
+        storage: 3Gi

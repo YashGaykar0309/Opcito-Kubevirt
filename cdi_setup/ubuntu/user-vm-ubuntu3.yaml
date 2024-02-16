@@ -1,0 +1,66 @@
+---
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  name: ubuntu3
+spec:
+  source:
+    http:
+      url: https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img
+  pvc:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 3Gi
+
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    kubevirt.io/os: linux
+  name: ubuntu-vm3
+spec:
+  running: true
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        kubevirt.io/domain: ubuntu-vm3
+    spec:
+      domain:
+        cpu:
+          cores: 2
+        devices:
+          disks:
+          - disk:
+              bus: virtio
+            name: disk0
+          - cdrom:
+              bus: sata
+              readonly: true
+            name: cloudinitdisk
+        resources:
+          requests:
+            memory: 512M
+      volumes:
+      - name: disk0
+        persistentVolumeClaim:
+          claimName: ubuntu
+      - cloudInitNoCloud:
+          userData: |
+            #cloud-config
+            users: 
+              - default
+              - name: yash
+                passwd: "$6$SK1VR3Konfcl/atJ$F3gQZ3tzV/ISwxcwokJyXTjfdnPgpq5daN9SL.cUvSmou908.GWPgId9Rd68gZhbUoILH.9l5lnF1rgkHuC4V1"
+                lock_passwd: false
+                shell: /bin/bash
+                ssh_pwauth: True
+                chpasswd: { expire: False}
+                sudo: ALL=(ALL) NOPASSWD:ALL
+                groups: users, admin
+                ssh_authorized_keys:
+                  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvMcNd5zd5D3K24L74xM3daYDdIesqZ3IISHxp5Aiefi7+hLg3bOXmJziRCEcL1DhW0LL/3K+wqr4CWgxjlAJGzETqSKflVM6oEswvc78Lx4+NXDvjtsVe/jk+4jfbea+90c1yjoyVwzzVnnHVfRwkM53ThOJKuk/vpdlbkhRsgFl+khvz0sD7Df1UHi8YtDDDvQxxZsUQGcNeeE7QmlhJQsr5BIPnFst5c+TJq0FXk33Tpr3da8bwxKEsTym28d2DglRQz5vi+U/g1FlbCTkNgJcd4HId4r0DJIbxHkrn/LjO0hG9jF7qk0J9xcsujFTItWlPnnhZjKZ3quB3B2HP yash@OPLPT112
+        name: cloudinitdisk

@@ -1,0 +1,62 @@
+---
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  name: ubuntu2
+spec:
+  source:
+    http:
+      url: https://cloud-images.ubuntu.com/minimal/releases/xenial/release/ubuntu-16.04-minimal-cloudimg-amd64-disk1.img
+  pvc:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 3Gi
+
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    kubevirt.io/os: linux
+  name: ubuntu-vm2
+spec:
+  running: false
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        kubevirt.io/domain: ubuntu-vm2
+    spec:
+      domain:
+        cpu:
+          cores: 2
+        devices:
+          disks:
+          - disk:
+              bus: virtio
+            name: disk0
+          - cdrom:
+              bus: sata
+              readonly: true
+            name: cloudinitdisk
+        resources:
+          requests:
+            memory: 256M
+      volumes:
+      - name: disk0
+        persistentVolumeClaim:
+          claimName: ubuntu2
+      - cloudInitNoCloud:
+          userData: |
+            #cloud-config
+            users: 
+              - default
+              - name: yash
+                passwd: "$6$SK1VR3Konfcl/atJ$F3gQZ3tzV/ISwxcwokJyXTjfdnPgpq5daN9SL.cUvSmou908.GWPgId9Rd68gZhbUoILH.9l5lnF1rgkHuC4V1"
+                lock_passwd: false
+                shell: /bin/bash
+                sudo: ALL=(ALL) NOPASSWD:ALL
+                groups: sudo
+        name: cloudinitdisk

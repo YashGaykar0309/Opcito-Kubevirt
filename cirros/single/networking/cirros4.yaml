@@ -1,0 +1,38 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: testvm4
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/size: small
+        kubevirt.io/domain: testvm4
+    spec:
+      domain:
+        devices:
+          disks:
+            - name: containerdisk
+              disk:
+                bus: virtio
+            - name: cloudinitdisk
+              disk:
+                bus: virtio
+          interfaces:
+          - name: ovs-net
+            bridge: {}
+        resources:
+          requests:
+            memory: 64M
+      networks:
+        - name: ovs-net
+          multus:
+            networkName:  bridge-test-2 
+      volumes:
+        - name: containerdisk
+          containerDisk:
+            image: quay.io/kubevirt/cirros-container-disk-demo
+        - name: cloudinitdisk
+          cloudInitNoCloud:
+            userDataBase64: SGkuXG4=

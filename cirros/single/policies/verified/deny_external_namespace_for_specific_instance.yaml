@@ -1,0 +1,11 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-same-namespace-instance
+spec:
+  podSelector:
+    matchLabels:
+      kubevirt.io/domain: testvm
+  ingress:
+    - from:
+        - podSelector: {}

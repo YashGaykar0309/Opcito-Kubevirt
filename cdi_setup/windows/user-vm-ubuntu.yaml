@@ -1,0 +1,120 @@
+---
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  name: windows-dv
+spec:
+  source:
+    http:
+      url: https://archive.org/download/windows-10_20H2/Win_20H2.iso
+  pvc:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 8Gi
+
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: windows-vm
+spec:
+  running: true
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        kubevirt.io/domain: windows-vm
+    spec:
+      domain:
+        cpu:
+          cores: 2
+        devices:
+          disks:
+          - disk:
+              bus: virtio
+            name: disk0
+          - cdrom:
+              bus: sata
+              readonly: true
+            name: cloudinitdisk
+        resources:
+          requests:
+            memory: 2Gi
+      volumes:
+      - name: disk0
+        persistentVolumeClaim:
+          claimName: windows-dv
+      - cloudInitNoCloud:
+          userData: |
+            #cloud-config
+            users:
+              - name: Administrator
+                groups:
+                  - Administrators
+                password: yash
+                lock_passwd: false
+         ---
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  name: windows-dv
+spec:
+  source:
+    http:
+      url: https://archive.org/download/windows-10_20H2/Win_20H2.iso
+  pvc:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 8Gi
+
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: windows-vm
+spec:
+  running: true
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        kubevirt.io/domain: windows-vm
+    spec:
+      domain:
+        cpu:
+          cores: 2
+        devices:
+          disks:
+          - disk:
+              bus: virtio0
+            name: disk0
+          - cdrom:
+              bus: sata
+              readonly: true
+            name: cloudinitdisk
+        resources:
+          requests:
+            memory: 2Gi
+      volumes:
+      - name: disk0
+        persistentVolumeClaim:
+          claimName: windows-dv
+      - cloudInitNoCloud:
+          userData: |
+            #cloud-config
+            users: 
+              - name: Administrator
+                groups:
+                  - Administrators
+                password: yash
+                lock_passwd: false
+                sudo: ALL=(ALL) NOPASSWD:ALL
+                chpasswd: { expire: False }
+        name: cloudinitdisk
+       sudo: ALL=(ALL) NOPASSWD:ALL
+                chpasswd: { expire: False }
+        name: cloudinitdisk

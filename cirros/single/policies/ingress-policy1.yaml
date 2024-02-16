@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-cirros-policy
+spec:
+  podSelector:
+    matchLabels:
+      kubevirt.io/domain: testvm2
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 10.244.120.0/32

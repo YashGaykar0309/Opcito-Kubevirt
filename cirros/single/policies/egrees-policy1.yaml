@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egress-cirros-policy
+spec:
+  podSelector:
+    matchLabels:
+      kubevirt.io/domain: testvm1
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 10.250.251.0/24
